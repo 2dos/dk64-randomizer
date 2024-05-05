@@ -10,6 +10,7 @@ import time
 import traceback
 import zipfile
 from io import BytesIO
+from enum import Enum
 
 import boto3
 
@@ -23,14 +24,18 @@ from randomizer.Spoiler import Spoiler
 load_base_rom()
 dynamodb = boto3.resource("dynamodb", aws_access_key_id=os.environ.get("AWS_ID"), aws_secret_access_key=os.environ.get("AWS_KEY"), region_name="us-west-2")
 
-
-def generate(generate_settings, file_name):
+def generate(generate_settings, file_name, batch_gen=False):
     """Gen a seed and write the file to an output file."""
     settings = Settings(generate_settings)
     spoiler = Spoiler(settings)
     patch, spoiler = Generate_Spoiler(spoiler)
     hash = spoiler.settings.seed_hash
     spoiler_log = json.loads(spoiler.json)
+    with open(file_name.replace(".z64", ".json"), "w") as fh:
+        del spoiler_log["Settings"]
+        del spoiler_log["Cosmetics"]
+        json.dump(spoiler_log, fh)
+        return
     # Only retain the Settings section and the Cosmetics section.
     if os.environ.get("HOSTED_SERVER") is not None:
         seed_table = dynamodb.Table("seed_db")
@@ -69,10 +74,14 @@ def main():
     parser.add_argument("--json_data", help="The json data to use to generate a seed", required=False)
     parser.add_argument("--preset", help="Preset to use", required=False)
     parser.add_argument("--output", help="File to name patch file", required=True)
+    parser.add_argument("--batch", help="Whether this is part of batch generated seeds", required=False)
     parser.add_argument("--seed", help="Seed ID to use", required=False)
     args = parser.parse_args()
-    print("This file is disabled till further notice.")
-    sys.exit(1)
+    # print("This file is disabled till further notice.")
+    # sys.exit(1)
+    batch_gen = False
+    if args.batch is not None:
+        batch_gen = args.batch
     if args.json_data is None:
         if args.settings_string is not None:
             try:
@@ -112,11 +121,15 @@ def main():
                 for val in v:
                     if type(val) is int:
                         values.append(SettingsMap[k](val))
+                    elif isinstance(val, Enum):
+                        values.append(val)
                     else:
                         values.append(SettingsMap[k][val])
                 setting_data[k] = values
             elif type(v) is int:
                 setting_data[k] = SettingsMap[k](v)
+            elif isinstance(v, Enum):
+                setting_data[k] = v
             else:
                 setting_data[k] = SettingsMap[k][v]
     try:
