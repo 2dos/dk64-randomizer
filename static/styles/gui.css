@@ -1110,3 +1110,20 @@ input[type=range][disabled]::-ms-fill-upper {
 .select-number-container.hide-input input {
   display: none !important;
 }
+
+.accordion--custom .accordion-header {
+  display: flex; /* make flex element */
+  align-items: center; /* aligning child items */
+  column-gap: 1rem; /* adding gap between items in row */
+  padding-left: 1rem;
+}
+
+/* small udjustments */
+.accordion--custom .accordion-header .accordion-button {
+  padding-left: 0;
+  background: none;
+}
+
+.accordion--custom .accordion-button:not(.collapsed) {
+  box-shadow: none;
+}

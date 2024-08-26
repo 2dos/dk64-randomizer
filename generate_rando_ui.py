@@ -15,7 +15,7 @@ from randomizer.Lists.Item import CustomStartingMoveSelector, HHItemSelector
 from randomizer.Lists.Logic import GlitchSelector
 from randomizer.Lists.Minigame import MinigameSelector
 from randomizer.Lists.Plandomizer import PlandomizerPanels, PlannableCustomLocations, PlannableItems, PlannableMinigames, PlannableSpawns, PlannableSwitches
-from randomizer.Lists.Multiselectors import QoLSelector, RemovedBarrierSelector, FasterCheckSelector
+from randomizer.Lists.Multiselectors import QoLSelector, RemovedBarrierSelector, FasterCheckSelector, CosmeticCheckDict
 from randomizer.Lists.Songs import ExcludedSongsSelector, MusicSelectFilter, MusicSelectionPanel, PlannableSongs, SongFilteringSelector
 from randomizer.Lists.Warps import VanillaBananaportSelector
 from randomizer.Lists.WrinklyHints import PointSpreadSelector
@@ -91,6 +91,7 @@ async def initialize():
         select_songs=PlannableSongs,
         remove_barriers=RemovedBarrierSelector,
         faster_checks=FasterCheckSelector,
+        cosmetic_changes=CosmeticCheckDict,
     )
     nav_rendered = await navtemplate.render()
     # get the "tab-data" div and replace it with the rendered template

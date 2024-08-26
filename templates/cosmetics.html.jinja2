@@ -1,4 +1,4 @@
-{% from 'macros.html.jinja2' import list_selector, toggle_input %}
+{% from 'macros.html.jinja2' import list_selector, toggle_input, nested_checks %}
 <div class="container" style="margin-top: 20px;">
     <div id="override_div"
          class="form-check form-switch item-switch center-flex"
@@ -40,6 +40,7 @@
                             </option>
                         </select>
                     </div>
+                    {{ nested_checks(cosmetic_changes, "detailed_cosmetics", "Cosmetic Changes", "Change various cosmetic elements about the game.") }}
                     <div class="item-select">
                         <p class="select-title">Random Models</p>
                         <select name="random_models"

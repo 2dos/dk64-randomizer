@@ -260,3 +260,146 @@
         })
     </script>
 {% endmacro %}
+{% macro nested_checks(check_dict, name, title, tooltip) %}
+<div class="item-select">
+    <p class="select-title">{{ title }}</p>
+    <!-- Icon triggers modal -->
+    <input class="customize"
+           type="button"
+           href="#"
+           id="{{ name }}_modal"
+           data-bs-toggle="modal"
+           data-bs-target="#{{ name }}_Modal"
+           data-toggle="tooltip"
+           title="{{ tooltip }}"/>
+</div>
+<!-- Modal -->
+<div class="modal fade"
+     id="{{ name }}_Modal"
+     tabindex="-1"
+     aria-labelledby="{{ name }}_ModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title title" id="{{ name }}_ModalLabel">{{ title }}</h3>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="accordion accordion--custom" id="{{ name }}_accordion_{{ group_value }}">
+                    {% for group in check_dict %}
+                        {% set group_value = group.replace(' ','_').lower() %}
+                        <div class="accordion-item">
+                            <div class="accordion-header" id="{{ name }}_header_{{ group_value }}">
+                                <input type="checkbox" class="form-check-input program_checkbox nest_head" id="{{ name }}_parent_{{ group_value }}" group="{{ name }}_{{ group_value }}">
+                                <a
+                                    class="accordion-button no-decoration"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#{{ name }}_collapse_{{ group_value }}"
+                                    aria-controls="{{ name }}_collapse_{{ group_value }}">
+                                    {{ group }}
+                                </a>
+                            </div>
+                        </div>
+                        <div
+                            id="{{ name }}_collapse_{{ group_value }}"
+                            style="margin-left:24px;"
+                            class="accordion-collapse collapse ml-4 text-start"
+                            aria-labelledby="{{ name }}_header_{{ group_value }}"
+                            data-bs-parent="#{{ name }}_accordion_{{ group_value }}">
+                            {% for item in check_dict[group] %}
+                                <div class="form-group form-check pl-4">
+                                    <input
+                                        type="checkbox"
+                                        class="form-check-input file_checkbox "
+                                        group="{{ name }}_{{ group_value }}"
+                                        id="{{ name }}_child_{{ item.value }}">
+                                    <label class="form-check-label" for="{{ name }}_child_{{ item.value }}">{{ item.name }}</label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+                {# 
+                    <div class="text-start">
+                        {% for group in check_dict %}
+                            {% set group_value = group.replace(' ','_').lower() %}
+                            <input type="checkbox" id="{{ name }}_parent_{{ group_value }}" class="nest_head" group="{{ name }}_{{ group_value }}"/>
+                            <label for="{{ name }}_parent_{{ group_value }}">{{ group }}</label>
+                            <ul class="list-group">
+                                {% for item in check_dict[group] %}
+                                    <li class="list-group-item" title="{{ item.tooltip }}">
+                                        <input type="checkbox" id="{{ name }}_child_{{ item.value }}" group="{{ name }}_{{ group_value }}"/>
+                                        <label for="{{ name }}_child_{{ item.value }}">{{ item.name }}</label>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endfor %}
+                    </div>
+                
+                #}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="{{ name }}_select_all">Select All</button>
+                <button type="button" class="btn btn-secondary" id="{{ name }}_reset">Reset</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#{{ name }}_Modal .nest_head').click((e) => {
+        const group = e.target.getAttribute("group");
+        const modal_head = document.getElementById("{{ name }}_Modal");
+        const inputs = modal_head.getElementsByTagName("input");
+        for (let i = 0; i < inputs.length; i++) {
+            if (inputs[i].getAttribute("group") == group) {
+                inputs[i].checked = e.target.checked;
+            }
+        }
+    })
+</script>
+{#
+<script>
+    $('#{{ name }}_selected option').mousedown(function(e) {
+        var el = e.target
+    
+        $(this).prop('selected', !$(this).prop('selected'));
+        $(this).trigger('change');
+    
+        // fixes erratic scroll behavior in Chrome
+        var scrollTop = el.parentNode.scrollTop;
+        setTimeout(() => el.parentNode.scrollTo(0, scrollTop), 0);
+    
+        return false;
+    });
+    
+    $('#{{ name }}_select_all').click(function() {
+        $('#{{ name }}_selected option').prop('selected', true);
+        $('#{{ name }}_selected').trigger('change');
+    });
+    
+    $('#{{ name }}_reset').click(function() {
+        $('#{{ name }}_selected option:selected').prop('selected', false);
+        $('#{{ name }}_selected').trigger('change');
+    });
+    
+    $('#{{ name }}_search_box').keyup(function() {
+        var keyword = document.getElementById("{{ name }}_search_box").value;
+        var select = document.getElementById("{{ name }}_selected");
+        for (var i = 0; i < select.length; i++) {
+            var txt = select.options[i].text;
+            if (txt.substring(0, keyword.length).toLowerCase() !== keyword.toLowerCase() && keyword.trim() !== "") {
+                select.options[i].style.display = 'none';
+            } else {
+                select.options[i].style.display = 'list-item';
+            }
+        }
+    });
+</script>
+#}
+{% endmacro %}

@@ -102,3 +102,13 @@ def parseMultiselector(items: list[MultiselectorItem]) -> list:
 QoLSelector = parseMultiselector(QoLItems)
 RemovedBarrierSelector = parseMultiselector(RemovedBarrierItems)
 FasterCheckSelector = parseMultiselector(FasterCheckItems)
+CosmeticCheckDict = {
+    "Enemy Colors": [
+        {"name": "Blue Beaver Color", "value": "blue_beaver_color", "tooltip": "Color of the skin of the blue beaver"},
+        {"name": "Gold Beaver Color", "value": "gold_beaver_color", "tooltip": "Color of the skin of the gold beaver"},
+    ],
+    "Models": [
+        {"name": "Beaver Bother Klaptrap", "value": "beaver_bother_klaptrap", "tooltip": "Model of the Beaver Bother klaptrap"},
+        {"name": "Peril Path Panic Fairy", "value": "peril_path_panic_fairy", "tooltip": "Model of the fairy in Peril Path Panic"},
+    ],
+}
