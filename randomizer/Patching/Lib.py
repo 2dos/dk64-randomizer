@@ -700,6 +700,9 @@ def writeText(file_index: int, text: List[Union[List[Dict[str, List[str]]], Tupl
     print(f"Written file index {file_index}, {comp_data[:2]}")
     ROM_COPY.seek(text_start)
     ROM_COPY.writeBytes(comp_data)
+    unc_table = js.pointer_addresses[TableNames.UncompressedFileSizes]["entries"][TableNames.Text]["pointing_to"]
+    ROM_COPY.seek(unc_table + file_index)
+    ROM_COPY.writeMultipleBytes(len(file_data), 4)
 
 
 def getObjectAddress(map: int, id: int, object_type: str) -> int:
