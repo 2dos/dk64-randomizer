@@ -464,7 +464,7 @@ def int_to_list(num: int, size: int):
 def getNextFreeID(cont_map_id: Union[Maps, int], ignore: List[Union[Any, int]] = []) -> int:
     """Get next available Model 2 ID."""
     ROM_COPY = LocalROM()
-    setup_table = js.pointer_addresses[9]["entries"][cont_map_id]["pointing_to"]
+    setup_table = js.pointer_addresses[TableNames.Setups]["entries"][cont_map_id]["pointing_to"]
     ROM_COPY.seek(setup_table)
     model2_count = int.from_bytes(ROM_COPY.readBytes(4), "big")
     vacant_ids = list(range(0, 600))
@@ -488,7 +488,7 @@ def getNextFreeID(cont_map_id: Union[Maps, int], ignore: List[Union[Any, int]] =
 def addNewScript(cont_map_id: Union[Maps, int], item_ids: List[int], type: ScriptTypes) -> None:
     """Append a new script to the script database. Has to be just 1 execution and 1 endblock."""
     ROM_COPY = LocalROM()
-    script_table = js.pointer_addresses[10]["entries"][cont_map_id]["pointing_to"]
+    script_table = js.pointer_addresses[TableNames.InstanceScripts]["entries"][cont_map_id]["pointing_to"]
     ROM_COPY.seek(script_table)
     script_count = int.from_bytes(ROM_COPY.readBytes(2), "big")
     good_scripts = []
@@ -552,6 +552,13 @@ def addNewScript(cont_map_id: Union[Maps, int], item_ids: List[int], type: Scrip
         for x in script:
             ROM_COPY.writeMultipleBytes(x, 2)
 
+def readDataInFile(data: bytes, offset: int, size: int) -> int:
+    """Read data from a byte array and return the value."""
+    value = 0
+    for x in range(size):
+        value <<= 8
+        value |= data[offset + x]
+    return value
 
 def grabText(file_index: int, cosmetic: bool = False) -> List[List[Dict[str, List[str]]]]:
     """Pull text from ROM with a particular file index."""
@@ -559,61 +566,55 @@ def grabText(file_index: int, cosmetic: bool = False) -> List[List[Dict[str, Lis
         ROM_COPY = ROM()
     else:
         ROM_COPY = LocalROM()
-    file_start = js.pointer_addresses[12]["entries"][file_index]["pointing_to"]
-    ROM_COPY.seek(file_start + 0)
-    count = int.from_bytes(ROM_COPY.readBytes(1), "big")
+    file_start = js.pointer_addresses[TableNames.Text]["entries"][file_index]["pointing_to"]
+    file_end = js.pointer_addresses[TableNames.Text]["entries"][file_index + 1]["pointing_to"]
+    file_size = file_end - file_start
+    print(file_index, hex(file_start))
+    ROM_COPY.seek(file_start)
+    print(hex(int.from_bytes(ROM_COPY.readBytes(2), "big")))
+    ROM_COPY.seek(file_start)
+    file_data = zlib.decompress(ROM_COPY.readBytes(file_size), (15 + 32))
+    count = readDataInFile(file_data, 0, 1)
     text = []
     text_data = []
     text_start = (count * 0xF) + 3
     data_start = 1
     for i in range(count):
         ROM_COPY.seek(file_start + data_start)
-        section_1_count = int.from_bytes(ROM_COPY.readBytes(1), "big")
-        section_2_count = int.from_bytes(ROM_COPY.readBytes(1), "big")
-        section_3_count = int.from_bytes(ROM_COPY.readBytes(1), "big")
-        ROM_COPY.seek(file_start + data_start + 5)
-        start = int.from_bytes(ROM_COPY.readBytes(2), "big")
+        section_1_count = readDataInFile(file_data, data_start, 1)
+        section_2_count = readDataInFile(file_data, data_start + 1, 1)
+        section_3_count = readDataInFile(file_data, data_start + 2, 1)
+        start = readDataInFile(file_data, data_start + 5, 2)
         int.from_bytes(ROM_COPY.readBytes(2), "big")
         block_start = 1
         blocks = []
         for k in range(section_1_count):
-            ROM_COPY.seek(file_start + data_start + block_start)
-            sec2ct = int.from_bytes(ROM_COPY.readBytes(1), "big")
+            sec2ct = readDataInFile(file_data, data_start + block_start, 1)
             offset = 0
             if (sec2ct & 4) != 0:
                 offset += 4
             text_blocks = []
             if (sec2ct & 1) == 0:
                 if (sec2ct & 2) != 0:
-                    ROM_COPY.seek(file_start + data_start + block_start + offset + 1)
-                    sec3ct = int.from_bytes(ROM_COPY.readBytes(1), "big")
+                    sec3ct = readDataInFile(file_data, data_start + block_start + offset + 1, 1)
                     for j in range(sec3ct):
                         _block = block_start + 2 + offset + (4 * j) - 1
-                        ROM_COPY.seek(file_start + data_start + _block)
-                        _pos = int.from_bytes(ROM_COPY.readBytes(2), "big")
-                        ROM_COPY.seek(file_start + data_start + _block)
-                        _dat = int.from_bytes(ROM_COPY.readBytes(4), "big")
+                        _pos = readDataInFile(file_data, data_start + _block, 2)
+                        _dat = readDataInFile(file_data, data_start + _block, 4)
                         text_blocks.append({"type": "sprite", "position": _pos, "data": hex(_dat), "sprite": icon_db[(_dat >> 8) & 0xFF]})
                     added = block_start + 2 + offset + (4 * sec3ct) + 4
             else:
-                ROM_COPY.seek(file_start + data_start + block_start + offset + 1)
-                sec3ct = int.from_bytes(ROM_COPY.readBytes(1), "big")
+                sec3ct = readDataInFile(file_data, data_start + block_start + offset + 1, 1)
                 for j in range(sec3ct):
                     _block = block_start + 2 + offset + (8 * j) - 1
-                    ROM_COPY.seek(file_start + data_start + _block + 3)
-                    _start = int.from_bytes(ROM_COPY.readBytes(2), "big")
-                    ROM_COPY.seek(file_start + data_start + _block + 5)
-                    _size = int.from_bytes(ROM_COPY.readBytes(2), "big")
+                    _start = readDataInFile(file_data, data_start + _block + 3, 2)
+                    _size = readDataInFile(file_data, data_start + _block + 5, 2)
                     text_blocks.append({"type": "normal", "start": _start, "size": _size})
                 added = block_start + 2 + offset + (8 * sec3ct) + 4
             # print(f"File {file_index}, Textbox {i}, section {k}")
             blocks.append({"block_start": hex(block_start + data_start), "section2count": sec2ct, "section3count": sec3ct, "offset": offset, "text": text_blocks})
             block_start = added
-        ROM_COPY.seek(file_start + data_start)
-        if added < data_start:
-            info = b""
-        else:
-            info = ROM_COPY.readBytes(added - data_start)
+        info = b""
         text_data.append({"arr": info, "text": blocks, "section1count": section_1_count, "section2count": section_2_count, "section3count": section_3_count, "data_start": hex(data_start)})
         text_start += added - data_start
         data_start += block_start
@@ -628,8 +629,7 @@ def grabText(file_index: int, cosmetic: bool = False) -> List[List[Dict[str, Lis
                     start = item3["start"] + data_start + 2
                     # print(hex(start))
                     start + item3["size"]
-                    ROM_COPY.seek(file_start + start)
-                    temp.append(ROM_COPY.readBytes(item3["size"]).decode())
+                    temp.append(file_data[start : start + item3["size"]].decode())
                 elif item3["type"] == "sprite":
                     temp.append(item3["sprite"])
                     # print(fh.read(item3["size"]))
@@ -643,19 +643,27 @@ def grabText(file_index: int, cosmetic: bool = False) -> List[List[Dict[str, Lis
         formatted_text.append(y)
     return formatted_text
 
+def intToByteArray(value: int, size: int) -> list:
+    """Convert an int to an array of 1-byte values."""
+    outp = [0] * size
+    for x in range(size):
+        slot = (size - 1) - x
+        outp[slot] = value & 0xFF
+        value >>= 8
+    return outp
+
 
 def writeText(file_index: int, text: List[Union[List[Dict[str, List[str]]], Tuple[Dict[str, List[str]]]]], cosmetic: bool = False) -> None:
     """Write the text to ROM."""
-    text_start = js.pointer_addresses[12]["entries"][file_index]["pointing_to"]
+    text_start = js.pointer_addresses[TableNames.Text]["entries"][file_index]["pointing_to"]
     if cosmetic:
         ROM_COPY = ROM()
     else:
         ROM_COPY = LocalROM()
-    ROM_COPY.seek(text_start)
-    ROM_COPY.writeBytes(bytearray([len(text)]))
+    file_data = [len(text)]
     position = 0
     for textbox in text:
-        ROM_COPY.writeBytes(len(textbox).to_bytes(1, "big"))
+        file_data.append(len(textbox))
         for block in textbox:
             # Get Icon State
             icon_id = -1
@@ -665,21 +673,19 @@ def writeText(file_index: int, text: List[Union[List[Dict[str, List[str]]], Tupl
                         if icon_db[icon] == string:
                             icon_id = icon
             if icon_id > -1:
-                ROM_COPY.writeBytes(bytearray([2, 1]))
-                ROM_COPY.writeBytes(icon_id.to_bytes(2, "big"))
-                ROM_COPY.writeBytes(bytearray([0, 0]))
+                file_data.extend([2, 1, 0, icon_id, 0, 0])
             else:
-                ROM_COPY.writeBytes(bytearray([1, len(block["text"])]))
+                file_data.extend([1, len(block["text"])])
                 for string in block["text"]:
-                    ROM_COPY.writeBytes(position.to_bytes(4, "big"))
-                    ROM_COPY.writeBytes(len(string).to_bytes(2, "big"))
-                    ROM_COPY.writeBytes(bytearray([0, 0]))
+                    file_data.extend(intToByteArray(position, 4))
+                    file_data.extend(intToByteArray(len(string), 2))
+                    file_data.extend([0, 0])
                     position += len(string)
             unk0 = 0
             if "unk0" in block:
                 unk0 = block["unk0"]
-            ROM_COPY.writeBytes(int(float_to_hex(unk0), 16).to_bytes(4, "big"))
-    ROM_COPY.writeBytes(bytearray(position.to_bytes(2, "big")))
+            file_data.extend(intToByteArray(int(float_to_hex(unk0), 16), 4))
+    file_data.extend(intToByteArray(position, 2))
     for textbox in text:
         for block in textbox:
             is_icon = False
@@ -688,12 +694,17 @@ def writeText(file_index: int, text: List[Union[List[Dict[str, List[str]]], Tupl
                     is_icon = True
             if not is_icon:
                 for string in block["text"]:
-                    ROM_COPY.writeBytes(string.encode("ascii"))
+                    str_ascii = string.encode("ascii")
+                    file_data.extend(list(str_ascii))
+    comp_data = gzip.compress(bytearray(file_data), compresslevel=9)
+    print(f"Written file index {file_index}, {comp_data[:2]}")
+    ROM_COPY.seek(text_start)
+    ROM_COPY.writeBytes(comp_data)
 
 
 def getObjectAddress(map: int, id: int, object_type: str) -> int:
     """Get address of object in setup."""
-    setup_start = js.pointer_addresses[9]["entries"][map]["pointing_to"]
+    setup_start = js.pointer_addresses[TableNames.Setups]["entries"][map]["pointing_to"]
     ROM_COPY = LocalROM()
     ROM_COPY.seek(setup_start)
     model_2_count = int.from_bytes(ROM_COPY.readBytes(4), "big")
@@ -720,7 +731,7 @@ def getObjectAddress(map: int, id: int, object_type: str) -> int:
 
 def getObjectAddressBrowser(map: int, id: int, object_type: str) -> int:
     """Get address of object in setup."""
-    setup_start = js.pointer_addresses[9]["entries"][map]["pointing_to"]
+    setup_start = js.pointer_addresses[TableNames.Setups]["entries"][map]["pointing_to"]
     ROM().seek(setup_start)
     model_2_count = int.from_bytes(ROM().readBytes(4), "big")
     if object_type == "modeltwo":
@@ -778,7 +789,7 @@ def applyCharacterSpawnerChanges(changes: list[SpawnerChange], fence_speed_facto
         formatted_changes[change.map_target][change.spawner_target] = change
         id_changes_in_map[change.map_target].append(change.spawner_target)
     for map_id in formatted_changes:
-        file_start = js.pointer_addresses[16]["entries"][map_id]["pointing_to"]
+        file_start = js.pointer_addresses[TableNames.Spawners]["entries"][map_id]["pointing_to"]
         ROM_COPY.seek(file_start)
         fence_count = int.from_bytes(ROM_COPY.readBytes(2), "big")
         offset = 2
@@ -1002,7 +1013,7 @@ def getRawFile(table_index: int, file_index: int, compressed: bool):
     return data
 
 
-def writeRawFile(table_index: int, file_index: int, compressed: bool, data: bytearray, ROM_COPY):
+def writeRawFile(table_index: TableNames, file_index: int, compressed: bool, data: bytearray, ROM_COPY):
     """Write raw file from ROM."""
     file_start = js.pointer_addresses[table_index]["entries"][file_index]["pointing_to"]
     file_end = js.pointer_addresses[table_index]["entries"][file_index + 1]["pointing_to"]

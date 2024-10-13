@@ -1523,15 +1523,16 @@ for index, text in enumerate(text_files):
         source_file=f"text{index}.bin" if text.file == "" else text.file,
     )
     if text.change:
-        data.do_not_compress = True
+        # data.do_not_compress = True
         data.do_not_delete_source = True
         data.do_not_extract = True
+        data.setTargetSize(os.path.getsize(text.file))
     else:
-        data.do_not_recompress = True
+        # data.do_not_recompress = True
         data.setTargetSize(0x2000)
     if text.change_expansion > 0:
         data.setTargetSize(text.change_expansion)
-        data.do_not_recompress = True
+        # data.do_not_recompress = True
     file_dict.append(data)
 
 with open(ROMName, "rb") as fh:
@@ -1744,10 +1745,13 @@ with open(newROMName, "r+b") as fh:
 
     # Replace Helm Text
     text_file = ROMPointerFile(fh, TableNames.Text, 19)
-    fh.seek(text_file.start + 0x7B9)
-    fh.write(("?").encode("ascii"))
+    fh.seek(text_file.start)
+    text_data = bytearray(zlib.decompress(fh.read(text_file.size), (15 + 32)))
+    text_data[0x7B9] = int.from_bytes(("?").encode("ascii"), "big")
     for i in range(0x15):
-        fh.write(("\0").encode("ascii"))
+        text_data[0x7BA + i] = int.from_bytes(("\0").encode("ascii"), "big")
+    fh.seek(text_file.start)
+    fh.write(gzip.compress(text_data, compresslevel=9))
     # for x in file_dict:
     #     if "is_diff_patch" in x and x["is_diff_patch"]:
     #         if os.path.exists(x["source_file"]):

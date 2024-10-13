@@ -12,7 +12,7 @@ from randomizer.Enums.Types import Types
 from randomizer.Enums.MoveTypes import MoveTypes
 from randomizer.Lists.Item import ItemList
 from randomizer.Enums.Maps import Maps
-from randomizer.Patching.Lib import float_to_hex, intf_to_float
+from randomizer.Patching.Lib import float_to_hex, intf_to_float, TableNames
 from randomizer.Lists.EnemyTypes import enemy_location_list
 from randomizer.Patching.Lib import float_to_hex, intf_to_float, setItemReferenceName, CustomActors
 from randomizer.Patching.Patcher import LocalROM
@@ -846,7 +846,7 @@ def place_randomized_items(spoiler, original_flut: list):
                 ROM_COPY.writeMultipleBytes(flag, 2)
         # Setup Changes
         for map_id in map_items:
-            cont_map_setup_address = js.pointer_addresses[9]["entries"][map_id]["pointing_to"]
+            cont_map_setup_address = js.pointer_addresses[TableNames.Setups]["entries"][map_id]["pointing_to"]
             ROM_COPY.seek(cont_map_setup_address)
             model2_count = int.from_bytes(ROM_COPY.readBytes(4), "big")
             for item in range(model2_count):

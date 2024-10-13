@@ -1543,8 +1543,8 @@ def recolorWrinklyDoors():
     """Recolor the Wrinkly hint door doorframes for colorblind mode."""
     file = [0xF0, 0xF2, 0xEF, 0x67, 0xF1]
     for kong in range(5):
-        wrinkly_door_start = js.pointer_addresses[4]["entries"][file[kong]]["pointing_to"]
-        wrinkly_door_finish = js.pointer_addresses[4]["entries"][file[kong] + 1]["pointing_to"]
+        wrinkly_door_start = js.pointer_addresses[TableNames.ModelTwoGeometry]["entries"][file[kong]]["pointing_to"]
+        wrinkly_door_finish = js.pointer_addresses[TableNames.ModelTwoGeometry]["entries"][file[kong] + 1]["pointing_to"]
         wrinkly_door_size = wrinkly_door_finish - wrinkly_door_start
         ROM().seek(wrinkly_door_start)
         indicator = int.from_bytes(ROM().readBytes(2), "big")
@@ -1587,8 +1587,8 @@ def recolorSlamSwitches(galleon_switch_value, ROM_COPY: ROM):
     file = [0x94, 0x93, 0x95, 0x96, 0xB8, 0x16C, 0x16B, 0x16D, 0x16E, 0x16A, 0x167, 0x166, 0x168, 0x169, 0x165]
     written_galleon_ship = False
     for switch in range(15):
-        slam_switch_start = js.pointer_addresses[4]["entries"][file[switch]]["pointing_to"]
-        slam_switch_finish = js.pointer_addresses[4]["entries"][file[switch] + 1]["pointing_to"]
+        slam_switch_start = js.pointer_addresses[TableNames.ModelTwoGeometry]["entries"][file[switch]]["pointing_to"]
+        slam_switch_finish = js.pointer_addresses[TableNames.ModelTwoGeometry]["entries"][file[switch] + 1]["pointing_to"]
         slam_switch_size = slam_switch_finish - slam_switch_start
         ROM().seek(slam_switch_start)
         indicator = int.from_bytes(ROM().readBytes(2), "big")
@@ -1641,8 +1641,8 @@ def recolorBlueprintModelTwo():
     """Recolor the Blueprint Model2 items for colorblind mode."""
     file = [0xDE, 0xE0, 0xE1, 0xDD, 0xDF]
     for kong in range(5):
-        blueprint_model2_start = js.pointer_addresses[4]["entries"][file[kong]]["pointing_to"]
-        blueprint_model2_finish = js.pointer_addresses[4]["entries"][file[kong] + 1]["pointing_to"]
+        blueprint_model2_start = js.pointer_addresses[TableNames.ModelTwoGeometry]["entries"][file[kong]]["pointing_to"]
+        blueprint_model2_finish = js.pointer_addresses[TableNames.ModelTwoGeometry]["entries"][file[kong] + 1]["pointing_to"]
         blueprint_model2_size = blueprint_model2_finish - blueprint_model2_start
         ROM().seek(blueprint_model2_start)
         indicator = int.from_bytes(ROM().readBytes(2), "big")
@@ -1692,8 +1692,8 @@ def recolorBlueprintModelTwo():
 def recolorBells():
     """Recolor the Chunky Minecart bells for colorblind mode (prot/deut)."""
     file = 693
-    minecart_bell_start = js.pointer_addresses[4]["entries"][file]["pointing_to"]
-    minecart_bell_finish = js.pointer_addresses[4]["entries"][file + 1]["pointing_to"]
+    minecart_bell_start = js.pointer_addresses[TableNames.ModelTwoGeometry]["entries"][file]["pointing_to"]
+    minecart_bell_finish = js.pointer_addresses[TableNames.ModelTwoGeometry]["entries"][file + 1]["pointing_to"]
     minecart_bell_size = minecart_bell_finish - minecart_bell_start
     ROM().seek(minecart_bell_start)
     indicator = int.from_bytes(ROM().readBytes(2), "big")
@@ -1763,8 +1763,8 @@ def recolorPotions(colorblind_mode):
     file = [[0xED, 0xEE, 0xEF, 0xF0, 0xF1, 0xF2], [0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA]]
     for type in range(2):
         for potion_color in range(6):
-            potion_actor_start = js.pointer_addresses[5]["entries"][file[type][potion_color]]["pointing_to"]
-            potion_actor_finish = js.pointer_addresses[5]["entries"][file[type][potion_color] + 1]["pointing_to"]
+            potion_actor_start = js.pointer_addresses[TableNames.ActorGeometry]["entries"][file[type][potion_color]]["pointing_to"]
+            potion_actor_finish = js.pointer_addresses[TableNames.ActorGeometry]["entries"][file[type][potion_color] + 1]["pointing_to"]
             potion_actor_size = potion_actor_finish - potion_actor_start
             ROM().seek(potion_actor_start)
             indicator = int.from_bytes(ROM().readBytes(2), "big")
@@ -1835,8 +1835,8 @@ def recolorPotions(colorblind_mode):
     # Model2:
     file = [91, 498, 89, 499, 501, 502]
     for potion_color in range(6):
-        potion_model2_start = js.pointer_addresses[4]["entries"][file[potion_color]]["pointing_to"]
-        potion_model2_finish = js.pointer_addresses[4]["entries"][file[potion_color] + 1]["pointing_to"]
+        potion_model2_start = js.pointer_addresses[TableNames.ModelTwoGeometry]["entries"][file[potion_color]]["pointing_to"]
+        potion_model2_finish = js.pointer_addresses[TableNames.ModelTwoGeometry]["entries"][file[potion_color] + 1]["pointing_to"]
         potion_model2_size = potion_model2_finish - potion_model2_start
         ROM().seek(potion_model2_start)
         indicator = int.from_bytes(ROM().readBytes(2), "big")
@@ -2113,16 +2113,16 @@ def applyKongModelSwaps(settings: Settings) -> None:
             source_data = model_index_mapping[value]
             for model_subindex in range(2):
                 if dest_data[model_subindex] is not None:
-                    dest_start = js.pointer_addresses[5]["entries"][dest_data[model_subindex]]["pointing_to"]
-                    source_start = js.pointer_addresses[5]["entries"][source_data[model_subindex]]["pointing_to"]
-                    source_end = js.pointer_addresses[5]["entries"][source_data[model_subindex] + 1]["pointing_to"]
+                    dest_start = js.pointer_addresses[TableNames.ActorGeometry]["entries"][dest_data[model_subindex]]["pointing_to"]
+                    source_start = js.pointer_addresses[TableNames.ActorGeometry]["entries"][source_data[model_subindex]]["pointing_to"]
+                    source_end = js.pointer_addresses[TableNames.ActorGeometry]["entries"][source_data[model_subindex] + 1]["pointing_to"]
                     source_size = source_end - source_start
                     ROM_COPY.seek(source_start)
                     file_bytes = ROM_COPY.readBytes(source_size)
                     ROM_COPY.seek(dest_start)
                     ROM_COPY.writeBytes(file_bytes)
                     # Write uncompressed size
-                    unc_table = js.pointer_addresses[26]["entries"][5]["pointing_to"]
+                    unc_table = js.pointer_addresses[TableNames.UncompressedFileSizes]["entries"][TableNames.ActorGeometry]["pointing_to"]
                     ROM_COPY.seek(unc_table + (source_data[model_subindex] * 4))
                     unc_size = int.from_bytes(ROM_COPY.readBytes(4), "big")
                     ROM_COPY.seek(unc_table + (dest_data[model_subindex] * 4))
@@ -2180,8 +2180,8 @@ def fixModelSmallKongCollision(kong_index: int):
         file = kong_index_mapping[kong_index][x]
         if file is None:
             continue
-        krusha_model_start = js.pointer_addresses[5]["entries"][file]["pointing_to"]
-        krusha_model_finish = js.pointer_addresses[5]["entries"][file + 1]["pointing_to"]
+        krusha_model_start = js.pointer_addresses[TableNames.ActorGeometry]["entries"][file]["pointing_to"]
+        krusha_model_finish = js.pointer_addresses[TableNames.ActorGeometry]["entries"][file + 1]["pointing_to"]
         krusha_model_size = krusha_model_finish - krusha_model_start
         ROM_COPY = LocalROM()
         ROM_COPY.seek(krusha_model_start)
@@ -2246,8 +2246,8 @@ def changeModelTextures(settings: Settings, kong_index: int):
         file = kong_index_mapping[kong_index][x]
         if file is None:
             continue
-        krusha_model_start = js.pointer_addresses[5]["entries"][file]["pointing_to"]
-        krusha_model_finish = js.pointer_addresses[5]["entries"][file + 1]["pointing_to"]
+        krusha_model_start = js.pointer_addresses[TableNames.ActorGeometry]["entries"][file]["pointing_to"]
+        krusha_model_finish = js.pointer_addresses[TableNames.ActorGeometry]["entries"][file + 1]["pointing_to"]
         krusha_model_size = krusha_model_finish - krusha_model_start
         ROM_COPY = LocalROM()
         ROM_COPY.seek(krusha_model_start)
@@ -2326,7 +2326,7 @@ def darkenDPad():
             bytes_array.extend([(value >> 8) & 0xFF, value & 0xFF])
     px_data = bytearray(bytes_array)
     px_data = gzip.compress(px_data, compresslevel=9)
-    ROM().seek(js.pointer_addresses[14]["entries"][187]["pointing_to"])
+    ROM().seek(js.pointer_addresses[TableNames.TexturesHUD]["entries"][187]["pointing_to"])
     ROM().writeBytes(px_data)
 
 
@@ -2376,15 +2376,15 @@ def placeKrushaHead(slot):
         img_data = [right, left][x]
         texture_index = kong_face_textures[slot][x]
         unc_index = unc_face_textures[slot][x]
-        texture_addr = js.pointer_addresses[25]["entries"][texture_index]["pointing_to"]
-        unc_addr = js.pointer_addresses[7]["entries"][unc_index]["pointing_to"]
+        texture_addr = js.pointer_addresses[TableNames.TexturesGeometry]["entries"][texture_index]["pointing_to"]
+        unc_addr = js.pointer_addresses[TableNames.TexturesUncompressed]["entries"][unc_index]["pointing_to"]
         data = gzip.compress(bytearray(img_data), compresslevel=9)
         ROM_COPY.seek(texture_addr)
         ROM_COPY.writeBytes(data)
         ROM_COPY.seek(unc_addr)
         ROM_COPY.writeBytes(bytearray(img_data))
-    rgba32_addr32 = js.pointer_addresses[14]["entries"][197 + slot]["pointing_to"]
-    rgba16_addr32 = js.pointer_addresses[14]["entries"][190 + slot]["pointing_to"]
+    rgba32_addr32 = js.pointer_addresses[TableNames.TexturesHUD]["entries"][197 + slot]["pointing_to"]
+    rgba16_addr32 = js.pointer_addresses[TableNames.TexturesHUD]["entries"][190 + slot]["pointing_to"]
     data32 = gzip.compress(bytearray(img32), compresslevel=9)
     data32_rgba32 = gzip.compress(bytearray(img32_rgba32), compresslevel=9)
     ROM_COPY.seek(rgba32_addr32)
@@ -2984,7 +2984,7 @@ def writeMiscCosmeticChanges(settings):
                     channel = (new_rgb >> shift) & 0xFF
                     file_data[local_start + 0xC + x] = channel
             file_data = gzip.compress(file_data, compresslevel=9)
-            ROM().seek(js.pointer_addresses[5]["entries"][enemy]["pointing_to"])
+            ROM().seek(js.pointer_addresses[TableNames.ActorGeometry]["entries"][enemy]["pointing_to"])
             ROM().writeBytes(file_data)
 
 
@@ -3335,11 +3335,11 @@ def applyHolidayMode(settings):
                     snow_by.extend([(data >> 8), (data & 0xFF)])
         byte_data = gzip.compress(bytearray(snow_by), compresslevel=9)
         for img in (0x4DD, 0x4E4, 0x6B, 0xF0, 0x8B2, 0x5C2, 0x66E, 0x66F, 0x685, 0x6A1, 0xF8, 0x136):
-            start = js.pointer_addresses[25]["entries"][img]["pointing_to"]
+            start = js.pointer_addresses[TableNames.TexturesGeometry]["entries"][img]["pointing_to"]
             ROM().seek(start)
             ROM().writeBytes(byte_data)
         # Alter CI4 Palettes
-        start = js.pointer_addresses[25]["entries"][2007]["pointing_to"]
+        start = js.pointer_addresses[TableNames.TexturesGeometry]["entries"][2007]["pointing_to"]
         mags = [140, 181, 156, 181, 222, 206, 173, 230, 255, 255, 255, 189, 206, 255, 181, 255]
         new_ci4_palette = []
         for mag in mags:
@@ -3378,24 +3378,24 @@ def applyHolidayMode(settings):
                     side_by.extend([(value >> 8) & 0xFF, value & 0xFF])
             px_data = bytearray(side_by)
             px_data = gzip.compress(px_data, compresslevel=9)
-            ROM().seek(js.pointer_addresses[25]["entries"][img]["pointing_to"])
+            ROM().seek(js.pointer_addresses[TableNames.TexturesGeometry]["entries"][img]["pointing_to"])
             ROM().writeBytes(px_data)
         # Change DK's Tie and Tiny's Hair
         if settings.dk_tie_colors != CharacterColors.custom and settings.kong_model_dk == KongModels.default:
             tie_hang = [0xFF] * 0xAB8
             tie_hang_data = gzip.compress(bytearray(tie_hang), compresslevel=9)
-            ROM().seek(js.pointer_addresses[25]["entries"][0xE8D]["pointing_to"])
+            ROM().seek(js.pointer_addresses[TableNames.TexturesGeometry]["entries"][0xE8D]["pointing_to"])
             ROM().writeBytes(tie_hang_data)
             tie_loop = [0xFF] * (32 * 32 * 2)
             tie_loop_data = gzip.compress(bytearray(tie_loop), compresslevel=9)
-            ROM().seek(js.pointer_addresses[25]["entries"][0x177D]["pointing_to"])
+            ROM().seek(js.pointer_addresses[TableNames.TexturesGeometry]["entries"][0x177D]["pointing_to"])
             ROM().writeBytes(tie_loop_data)
         if settings.tiny_hair_colors != CharacterColors.custom and settings.kong_model_tiny == KongModels.default:
             tiny_hair = []
             for x in range(32 * 32):
                 tiny_hair.extend([0xF8, 0x01])
             tiny_hair_data = gzip.compress(bytearray(tiny_hair), compresslevel=9)
-            ROM().seek(js.pointer_addresses[25]["entries"][0xE68]["pointing_to"])
+            ROM().seek(js.pointer_addresses[TableNames.TexturesGeometry]["entries"][0xE68]["pointing_to"])
             ROM().writeBytes(tiny_hair_data)
         # Tag Barrel, Bonus Barrel & Transform Barrels
         changeBarrelColor(None, (0x00, 0xC0, 0x00))
@@ -3418,7 +3418,7 @@ def applyHolidayMode(settings):
                     side_by.extend([(value >> 8) & 0xFF, value & 0xFF])
             px_data = bytearray(side_by)
             px_data = gzip.compress(px_data, compresslevel=9)
-            ROM().seek(js.pointer_addresses[25]["entries"][img]["pointing_to"])
+            ROM().seek(js.pointer_addresses[TableNames.TexturesGeometry]["entries"][img]["pointing_to"])
             ROM().writeBytes(px_data)
         # Tag Barrel, Bonus Barrel & Transform Barrels
         changeBarrelColor((0x00, 0xC0, 0x00))
@@ -3579,7 +3579,7 @@ def darkenPauseBubble(settings: Settings):
             bytes_array.extend([(value >> 8) & 0xFF, value & 0xFF])
     px_data = bytearray(bytes_array)
     px_data = gzip.compress(px_data, compresslevel=9)
-    ROM().seek(js.pointer_addresses[14]["entries"][107]["pointing_to"])
+    ROM().seek(js.pointer_addresses[TableNames.TexturesHUD]["entries"][107]["pointing_to"])
     ROM().writeBytes(px_data)
 
 

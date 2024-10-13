@@ -2021,7 +2021,7 @@ def patchAssembly(ROM_COPY, spoiler):
         0x08,  # Cutscenes
         0x09,  # Setup
         0x0A,  # Instance Scripts
-        0x0C,  # Text
+        # 0x0C,  # Text
         0x10,  # Character Spawners
         0x12,  # Loading Zones
         0x18,  # Checkpoints

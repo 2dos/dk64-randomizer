@@ -9,43 +9,12 @@ from randomizer.Patching.Lib import grabText, writeText
 from randomizer.Patching.Patcher import LocalROM
 
 
-def writeWrinklyHints(file_start_offset, text):
+def writeWrinklyHints(file_index, text):
     """Write the text to ROM."""
-    ROM_COPY = LocalROM()
-    ROM_COPY.seek(file_start_offset)
-    ROM_COPY.writeMultipleBytes(len(text), 1)
-    position = 0
-    offset = 1
-    for textbox in text:
-        ROM_COPY.seek(file_start_offset + offset)
-        ROM_COPY.writeMultipleBytes(1, 1)
-        ROM_COPY.seek(file_start_offset + offset + 1)
-        ROM_COPY.writeMultipleBytes(1, 1)
-        ROM_COPY.seek(file_start_offset + offset + 2)
-        ROM_COPY.writeMultipleBytes(len(textbox), 1)
-        offset += 3
-        for string in textbox:
-            ROM_COPY.seek(file_start_offset + offset)
-            ROM_COPY.writeMultipleBytes(position, 4)
-            ROM_COPY.seek(file_start_offset + offset + 4)
-            ROM_COPY.writeMultipleBytes(len(string), 2)
-            ROM_COPY.seek(file_start_offset + offset + 6)
-            ROM_COPY.writeMultipleBytes(0, 2)
-            offset += 8
-            position += len(string)
-        ROM_COPY.seek(file_start_offset + offset)
-        ROM_COPY.writeMultipleBytes(0, 4)
-        offset += 4
-    ROM_COPY.seek(file_start_offset + offset)
-    ROM_COPY.writeMultipleBytes(position, 2)
-    offset += 2
-    for textbox in text:
-        for string in textbox:
-            for x in range(len(string)):
-                ROM_COPY.seek(file_start_offset + offset + x)
-                ROM_COPY.writeMultipleBytes(int.from_bytes(string[x].encode("ascii"), "big"), 1)
-            offset += len(string)
-
+    temp_text = []
+    for item in text:
+        temp_text.append([{"text": item}])
+    writeText(file_index, temp_text)
 
 def UpdateHint(WrinklyHint: HintLocation, message: str):
     """Update the wrinkly hint with the new string.
@@ -97,8 +66,8 @@ def PushHints(spoiler):
         if short_hint == "":
             short_hint = "error: missing hint - report this error to the discord"
         short_hint_arr.append([short_hint.upper()])
-    writeWrinklyHints(js.pointer_addresses[12]["entries"][41]["pointing_to"], hint_arr)
-    writeWrinklyHints(js.pointer_addresses[12]["entries"][45]["pointing_to"], short_hint_arr)
+    writeWrinklyHints(41, hint_arr)
+    writeWrinklyHints(45, short_hint_arr)
     spoiler.hint_list.pop("First Time Talk")  # The FTT needs to be written to the ROM but should not be found in the spoiler log
 
 
@@ -116,7 +85,7 @@ def PushItemLocations(spoiler):
         text_arr.append([loc.item_name.upper()])
         for subloc in loc.locations:
             text_arr.append([subloc.upper()])
-    writeWrinklyHints(js.pointer_addresses[12]["entries"][44]["pointing_to"], text_arr)
+    writeWrinklyHints(44, text_arr)
 
 
 def replaceIngameText(spoiler):

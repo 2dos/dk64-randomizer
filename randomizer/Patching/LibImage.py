@@ -7,6 +7,7 @@ import gzip
 from enum import IntEnum, auto
 from PIL import Image
 from randomizer.Patching.Patcher import ROM, LocalROM
+from randomizer.Patching.Lib import TableNames
 
 
 class TextureFormat(IntEnum):
@@ -175,10 +176,10 @@ def imageToCI(ROM_COPY: ROM, im_f, ci_index: int, tex_index: int, pal_index: int
         pal_bin.extend([upper, lower])
     tex_bin_file = gzip.compress(bytearray(tex_bin), compresslevel=9)
     pal_bin_file = gzip.compress(bytearray(pal_bin), compresslevel=9)
-    tex_start = js.pointer_addresses[25]["entries"][tex_index]["pointing_to"]
-    tex_end = js.pointer_addresses[25]["entries"][tex_index + 1]["pointing_to"]
-    pal_start = js.pointer_addresses[25]["entries"][pal_index]["pointing_to"]
-    pal_end = js.pointer_addresses[25]["entries"][pal_index + 1]["pointing_to"]
+    tex_start = js.pointer_addresses[TableNames.TexturesGeometry]["entries"][tex_index]["pointing_to"]
+    tex_end = js.pointer_addresses[TableNames.TexturesGeometry]["entries"][tex_index + 1]["pointing_to"]
+    pal_start = js.pointer_addresses[TableNames.TexturesGeometry]["entries"][pal_index]["pointing_to"]
+    pal_end = js.pointer_addresses[TableNames.TexturesGeometry]["entries"][pal_index + 1]["pointing_to"]
     if (tex_end - tex_start) < len(tex_bin_file):
         return
     if (pal_end - pal_start) < len(pal_bin_file):
